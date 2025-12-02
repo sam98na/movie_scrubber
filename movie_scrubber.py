@@ -7,7 +7,7 @@ from collections import defaultdict
 from time import sleep
 
 
-options = webdriver.FirefoxOptions()
+options = webdriver.ChromeOptions()
 # user_agent = UserAgent().random
 # options.add_argument(f"user-agent={user_agent}")
 # options.add_argument("start-maximized")
@@ -16,7 +16,7 @@ options = webdriver.FirefoxOptions()
 # options.add_experimental_option('useAutomationExtension', False)
 
 
-driver = webdriver.Firefox(options=options)
+driver = webdriver.Chrome(options=options)
 
 
 list_of_non_movies = ["See a Movie", "Find a Theatre", "", "Assistive Moviegoing", "Watch Video", "Discover More", 
@@ -35,42 +35,58 @@ def non_movie_stripper(defdict, non_movies):
 
 def movies_fetcher(web_driver: webdriver.Chrome, address, driver_selector, driver_selector_string, count_dict, alamo):
     web_driver.get(address)
-    web_driver.implicitly_wait(10)
-    sleep(20)
+    web_driver.implicitly_wait(20)
+    sleep(5)
     if alamo:
         button_text = "Mountain View"
         try:
             button = web_driver.find_element(By.XPATH, f"//button[contains(text(),'{button_text}')]")
-            web_driver.implicitly_wait(10)
+            web_driver.implicitly_wait(20)
             button.click()
-            sleep(10)
+            sleep(5)
             print(f"Button with text '{button_text}' clicked successfully (exact match).")
         except Exception as e:
             print(repr(e))
             print(f"Button with text '{button_text}' not found or not clickable")
+    waited_elements = WebDriverWait(driver, 20).until(lambda driver: len(driver.find_elements(driver_selector, driver_selector_string)) > 6)
+    print(f"Waited: {waited_elements}")
     movie_names = [i.text.upper() for i in web_driver.find_elements(driver_selector, driver_selector_string)]
+    print(f"Waited elements: {movie_names}")
+    web_driver.implicitly_wait(20)
     for i in movie_names:
         count_dict[i] += 1
  
 # create webdriver object
-# stealth(driver,
-#         languages=["en-US", "en"],
-#         vendor="Google Inc.",
-#         platform="Win32",
-#         webgl_vendor="Intel Inc.",
-#         renderer="Intel Iris OpenGL Engine",
-#         webdriver=False,
-#         fix_hairline=True)
+stealth(driver,
+        languages=["en-US", "en"],
+        vendor="Google Inc.",
+        platform="Win32",
+        webgl_vendor="Intel Inc.",
+        renderer="Intel Iris OpenGL Engine",
+        webdriver=False,
+        fix_hairline=True)
+
+sunnyvale_amc_link = "https://www.amctheatres.com/movie-theatres/san-francisco/amc-dine-in-sunnyvale-12/showtimes"
+mercado_amc_link = "https://www.amctheatres.com/movie-theatres/san-francisco/amc-mercado-20/showtimes"
+alamo_link = "https://www.drafthouse.com/sf?showCalendar=true"
 
 
  
-#amc
-movies_fetcher(driver, "https://www.amctheatres.com/movies?availability=NOW_PLAYING",
+#amc sunnyvale
+movies_fetcher(driver, sunnyvale_amc_link,
                By.CSS_SELECTOR, "a[href*='/movies']:not([href*='showtime'])", amc_dict, False)
 
-#alamo
-movies_fetcher(driver, "https://www.drafthouse.com/sf?showCalendar=true",
-               By.CLASS_NAME, "calendar_showlink", alamo_dict, True)
+#amc mercado
+# movies_fetcher(driver, mercado_amc_link,
+#                By.CSS_SELECTOR, "a[href*='/movies']:not([href*='showtime'])", amc_dict, False)
+
+# #alamo
+# movies_fetcher(driver, alamo_link,
+#                By.CLASS_NAME, "calendar_showlink", alamo_dict, True)
+
+#alamo css selector version
+movies_fetcher(driver, alamo_link,
+               By.CSS_SELECTOR, "a[href*='/show']", alamo_dict, True)
 
 # #regal
 # movies_fetcher(driver, "https://www.regmovies.com/movies",
@@ -78,6 +94,8 @@ movies_fetcher(driver, "https://www.drafthouse.com/sf?showCalendar=true",
 
 non_movie_stripper(amc_dict, list_of_non_movies)
 non_movie_stripper(alamo_dict, list_of_non_movies)
+print(amc_dict)
+print(alamo_dict)
 
 combined = defaultdict(int)
 amc_movies, alamo_movies = set(list(amc_dict.keys())), set(list(alamo_dict.keys()))
