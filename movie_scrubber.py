@@ -48,9 +48,8 @@ def movies_fetcher(web_driver: webdriver.Chrome, address, driver_selector, drive
         except Exception as e:
             print(repr(e))
             print(f"Button with text '{button_text}' not found or not clickable")
-    waited_elements = WebDriverWait(driver, 20).until(lambda driver: len(driver.find_elements(driver_selector, driver_selector_string)) > 6)
-    print(f"Waited: {waited_elements}")
-    movie_names = [i.text.upper() for i in web_driver.find_elements(driver_selector, driver_selector_string)]
+    fetched_movie_names = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((driver_selector, driver_selector_string)))
+    movie_names = [i.text.upper() for i in fetched_movie_names]
     print(f"Waited elements: {movie_names}")
     web_driver.implicitly_wait(20)
     for i in movie_names:
@@ -81,12 +80,12 @@ movies_fetcher(driver, sunnyvale_amc_link,
 #                By.CSS_SELECTOR, "a[href*='/movies']:not([href*='showtime'])", amc_dict, False)
 
 # #alamo
-# movies_fetcher(driver, alamo_link,
-#                By.CLASS_NAME, "calendar_showlink", alamo_dict, True)
+movies_fetcher(driver, alamo_link,
+               By.CLASS_NAME, "calendar_showlink", alamo_dict, True)
 
 #alamo css selector version
-movies_fetcher(driver, alamo_link,
-               By.CSS_SELECTOR, "a[href*='/show']", alamo_dict, True)
+# movies_fetcher(driver, alamo_link,
+#                By.CSS_SELECTOR, "a[href*='/show/']", alamo_dict, True)
 
 # #regal
 # movies_fetcher(driver, "https://www.regmovies.com/movies",
