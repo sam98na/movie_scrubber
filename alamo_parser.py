@@ -1,4 +1,6 @@
-from utils import get_text_from_element, initialize_webdriver
+import datetime
+
+from utils import convert_date_to_uniform, get_text_from_element, initialize_webdriver
 
 from selenium import webdriver
 from selenium_stealth import stealth
@@ -13,7 +15,7 @@ import pprint
 config = yaml.safe_load(open("config.yaml", "r"))
 
 def main_alamo_scraper(alamo_link, button_text):
-    print("Starting Alamo Scraper")
+    print("-- Starting Alamo Scraper --")
     driver = initialize_webdriver()
 
     driver.get(alamo_link)
@@ -36,7 +38,7 @@ def main_alamo_scraper(alamo_link, button_text):
         print(f"-- Available calendar days processed: {len(calendar_day)} --")
         for calendar_day in calendar_day:
             dateElement = calendar_day.find_element(By.CSS_SELECTOR, "span.calendar_dayDate:not(.bodyText-strong)")
-            dateText = get_text_from_element(dateElement)
+            dateText = convert_date_to_uniform(get_text_from_element(dateElement))
             overall_data[dateText] = {}
 
             movieElements = calendar_day.find_elements(By.TAG_NAME, "li")
@@ -52,6 +54,13 @@ def main_alamo_scraper(alamo_link, button_text):
     driver.quit()
     return overall_data
 
+def get_current_day_data(overall_data):
+    current_day = datetime.datetime.now().strftime("%Y-%m-%d")
+    return overall_data.get(current_day, {})
+
+def get_unique_names(current_data):
+    return set(current_data.keys())
+
 if __name__ == "__main__":
-    alamo_data = main_alamo_scraper()
+    alamo_data = main_alamo_scraper(config["alamo_sf_link"], "Mountain View")
     pprint.pprint(alamo_data)
