@@ -30,7 +30,7 @@ def main_amc_scraper(amc_link, date=datetime.now().strftime("%Y-%m-%d")):
         current_object = {}
         movie_name = row.find_elements(By.XPATH, ".//h1//a[starts-with(@href, '/movies/')]")
         movie_name = get_text_from_element(movie_name[0])
-        movie_name = movie_name.upper()
+        movie_name = movie_name.upper().strip()
 
         formats = row.find_elements(By.XPATH, "./div[starts-with(@aria-label, 'Showtimes at')]/ul[contains(@aria-label, 'Showtimes')]/li")
         for li_s in formats:

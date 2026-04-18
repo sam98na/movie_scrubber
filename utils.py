@@ -1,3 +1,4 @@
+import json
 import re
 
 from selenium import webdriver
@@ -53,6 +54,16 @@ def initialize_webdriver(headless=True):
     driver.implicitly_wait(2)
 
     return driver
+
+def export_as_json(data, filename):
+    """
+        Exports data to a JSON file.
+        Args:
+            data (dict): The data to be exported.
+            filename (str): The name of the output JSON file.
+    """
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=4)
 
 if __name__ == "__main__":
     print(convert_date_to_uniform("Mon, Mar 9"))

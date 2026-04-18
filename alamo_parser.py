@@ -44,7 +44,7 @@ def main_alamo_scraper(alamo_link, button_text):
             movieElements = calendar_day.find_elements(By.TAG_NAME, "li")
             for movies in movieElements:
                 movieName = movies.find_element(By.CLASS_NAME, "calendar_showlink")
-                movieNameText = get_text_from_element(movieName)
+                movieNameText = get_text_from_element(movieName).strip()
                 overall_data[dateText][movieNameText] = []
                 showtimes = movies.find_elements(By.CLASS_NAME, "calendar_showtimes")[0].find_elements(By.TAG_NAME, "a")
                 for showtime in showtimes:
@@ -61,6 +61,21 @@ def get_current_day_data(overall_data):
 def get_unique_names(current_data):
     return set(current_data.keys())
 
+def mold_to_amc_format(current_data):
+    molded_data = {}
+    for movie_name, showtimes in current_data.items():
+        molded_data[movie_name.upper().strip()] = {
+            "formats": [
+                {
+                    "format_name": "Alamo Standard",
+                    "attributes": [],
+                    "showtimes": showtimes
+                }
+            ]
+        }
+    return molded_data
+
 if __name__ == "__main__":
     alamo_data = main_alamo_scraper(config["alamo_sf_link"], "Mountain View")
-    pprint.pprint(alamo_data)
+    molded_data = mold_to_amc_format(alamo_data)
+    pprint.pprint(molded_data)

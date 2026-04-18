@@ -1,15 +1,20 @@
+import pprint
+
 import yaml
-from alamo_parser import main_alamo_scraper, get_current_day_data
+from alamo_parser import main_alamo_scraper, get_current_day_data, mold_to_amc_format
 from amc_parser import get_unique_names, main_amc_scraper
+from utils import export_as_json
 
 config = yaml.safe_load(open("config.yaml", "r"))
 
-if __name__ == "__main__":
+def overall_scraper():
     mt_alamo_data = main_alamo_scraper(config["alamo_sf_link"], "Mountain View")
     current_day_mt_data = get_current_day_data(mt_alamo_data)
+    export_as_json(current_day_mt_data, "saved_jsons/alamo_mt_data.json")
     mt_unique_movies = get_unique_names(current_day_mt_data)
 
     vf_alamo_data = main_alamo_scraper(config["alamo_sf_link"], "Valley Fair")
+    export_as_json(vf_alamo_data, "saved_jsons/alamo_vf_data.json")
     current_day_vf_data = get_current_day_data(vf_alamo_data)
     vf_unique_movies = get_unique_names(current_day_vf_data)
 
@@ -18,9 +23,11 @@ if __name__ == "__main__":
     # sf_unique_movies = get_unique_names(current_day_sf_data)
 
     sunnyvale_amc_data = main_amc_scraper(config["amc_sunval_link"])
+    export_as_json(sunnyvale_amc_data, "saved_jsons/amc_sunnyvale_data.json")
     sunnyvale_unique_movies = get_unique_names(sunnyvale_amc_data)
 
     mercado_amc_data = main_amc_scraper(config["amc_mercado_link"])
+    export_as_json(mercado_amc_data, "saved_jsons/amc_mercado_data.json")
     mercado_unique_movies = get_unique_names(mercado_amc_data)
 
     print(mt_unique_movies)
@@ -57,3 +64,25 @@ if __name__ == "__main__":
         if movie not in common_movies:
             print(f"-- {movie} (Alamo Valley Fair)")
     print("\n\n")
+
+def loaded_scraper():
+    with open("saved_jsons/alamo_mt_data.json", "r") as f:
+        mt_data = yaml.safe_load(f)
+    with open("saved_jsons/alamo_vf_data.json", "r") as f:
+        vf_data = yaml.safe_load(f)
+    with open("saved_jsons/amc_sunnyvale_data.json", "r") as f:
+        sunnyvale_data = yaml.safe_load(f)
+    with open("saved_jsons/amc_mercado_data.json", "r") as f:
+        mercado_data = yaml.safe_load(f)
+
+    mt_unique_movies = get_unique_names(mt_data)
+    vf_unique_movies = get_unique_names(vf_data)
+    sunnyvale_unique_movies = get_unique_names(sunnyvale_data)
+    mercado_unique_movies = get_unique_names(mercado_data)
+
+    pprint.pprint(mold_to_amc_format(mt_data))
+    print("\n\n")
+    pprint.pprint(sunnyvale_data)
+
+if __name__ == "__main__":
+    loaded_scraper()
