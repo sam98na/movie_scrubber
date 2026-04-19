@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Now Showing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Jost:wght@700&family=Spectral:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      /* OKLCH palette, neutrals tinted toward 70 degrees (warm) */
+      --paper:    oklch(97% 0.012 75);
+      --ink:      oklch(22% 0.015 70);
+      --ink-soft: oklch(45% 0.015 70);
+      --ink-mute: oklch(60% 0.010 70);
+      --rule:     oklch(82% 0.012 70);
+      --accent:   oklch(56% 0.18 28);
+
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-24: 6rem;
+
+      --t-xs: 0.75rem;
+      --t-sm: 0.875rem;
+      --t-md: 1rem;
+      --t-lg: 1.25rem;
+
+      --t-title:    clamp(2.25rem, 5.5vw, 4.25rem);
+      --t-masthead: clamp(2.5rem, 8vw, 6rem);
+
+      --ff-marquee:
+        "Big Shoulders Display", "Arial Narrow", sans-serif;
+      --ff-avant:
+        "ITC Avant Garde Gothic Std", "ITC Avant Garde Gothic",
+        "Avant Garde", "Century Gothic", "Jost", "URW Gothic",
+        "Trebuchet MS", sans-serif;
+      --ff-body:
+        "Spectral", Georgia, "Times New Roman", serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { background: var(--paper); }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--ff-body);
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 1.5;
+      font-feature-settings: "kern", "liga", "onum";
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    .page {
+      width: 90%;
+      margin: 0 auto;
+      padding: var(--space-16) 0 var(--space-24);
+    }
+
+    /* ---------- Masthead ---------- */
+    .masthead {
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--ink);
+    }
+    .masthead h1 {
+      font-family: var(--ff-marquee);
+      font-weight: 800;
+      font-size: var(--t-masthead);
+      line-height: 0.9;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .masthead-tag {
+      font-family: var(--ff-body);
+      font-style: italic;
+      font-size: var(--t-md);
+      color: var(--ink-soft);
+      margin: var(--space-3) 0 0;
+    }
+
+    /* ---------- Control bar (sort + filter) ---------- */
+    .control-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-3);
+      padding: var(--space-4) 0 var(--space-12);
+    }
+
+    .sort-bar,
+    .filter-bar {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-4);
+      font-family: var(--ff-marquee);
+      font-weight: 700;
+      font-size: var(--t-sm);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .control-label {
+      color: var(--ink-soft);
+      margin-right: var(--space-2);
+    }
+
+    /* sort buttons */
+    .sort-bar button {
+      all: unset;
+      cursor: pointer;
+      color: var(--ink-mute);
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      transition: color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sort-bar button:hover { color: var(--ink-soft); }
+    .sort-bar button:focus-visible,
+    .filter-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 6px;
+    }
+    .sort-bar button[aria-pressed="true"] {
+      color: var(--ink);
+      text-decoration: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 0.4em;
+      text-decoration-color: var(--ink);
+    }
+    .sort-bar .slash {
+      color: var(--rule);
+      pointer-events: none;
+    }
+
+    /* filter dropdown */
+    .filter-bar { position: relative; }
+    .filter-toggle {
+      all: unset;
+      cursor: pointer;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.5em;
+      padding-bottom: 0.2em;
+      border-bottom: 1.5px solid var(--ink);
+      transition: opacity 160ms;
+    }
+    .filter-toggle:hover { opacity: 0.7; }
+    .filter-caret {
+      font-size: 0.75em;
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      display: inline-block;
+    }
+    .filter-toggle[aria-expanded="true"] .filter-caret {
+      transform: rotate(180deg);
+    }
+
+    .filter-menu {
+      position: absolute;
+      top: calc(100% + var(--space-3));
+      right: 0;
+      min-width: 22rem;
+      display: grid;
+      grid-template-rows: 0fr;
+      transition:
+        grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .filter-menu[data-open="true"] {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .filter-menu-inner {
+      overflow: hidden;
+      min-height: 0;
+    }
+    .filter-menu-card {
+      background: var(--paper);
+      border: 1px solid var(--ink);
+      padding: var(--space-4) var(--space-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .filter-menu-card .filter-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: var(--space-4);
+      padding-bottom: var(--space-3);
+      margin-bottom: var(--space-2);
+      border-bottom: 1px solid var(--rule);
+    }
+    .filter-meta-label {
+      font-family: var(--ff-marquee);
+      font-weight: 700;
+      font-size: var(--t-xs);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .filter-meta button {
+      all: unset;
+      cursor: pointer;
+      font-family: var(--ff-marquee);
+      font-weight: 700;
+      font-size: var(--t-xs);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      transition: color 160ms;
+    }
+    .filter-meta button:hover { color: var(--ink); }
+    .filter-meta button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    .filter-menu label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      cursor: pointer;
+      font-family: var(--ff-body);
+      font-style: normal;
+      font-weight: 400;
+      font-size: var(--t-md);
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--ink-mute);
+      padding: 0.2em 0;
+      transition: color 160ms;
+    }
+    .filter-menu label:hover { color: var(--ink-soft); }
+    .filter-menu label:has(input:checked) { color: var(--ink); }
+
+    .filter-menu input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1em;
+      height: 1em;
+      border: 1px solid var(--ink);
+      background: var(--paper);
+      margin: 0;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: inline-block;
+      transition: background 120ms;
+    }
+    .filter-menu input[type="checkbox"]:checked {
+      background: var(--ink);
+    }
+    .filter-menu input[type="checkbox"]:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    /* ---------- Movie list ---------- */
+    .movies {
+      display: flex;
+      flex-direction: column;
+    }
+    .movie {
+      padding: var(--space-12) 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .movie:first-child { padding-top: 0; }
+    .movie:last-child { border-bottom: none; }
+
+    .movie-meta {
+      font-family: var(--ff-body);
+      font-style: italic;
+      font-size: var(--t-md);
+      color: var(--ink-soft);
+      margin: 0 0 var(--space-3);
+    }
+    .movie-meta .sep {
+      display: inline-block;
+      margin: 0 0.55em;
+      color: var(--rule);
+    }
+
+    .movie-header {
+      all: unset;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: baseline;
+      column-gap: var(--space-8);
+      width: 100%;
+      cursor: pointer;
+      padding: var(--space-2) 0;
+    }
+    .movie-header:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 6px;
+    }
+    .movie-title {
+      font-family: var(--ff-avant);
+      font-weight: 700;
+      font-size: var(--t-title);
+      line-height: 0.96;
+      letter-spacing: -0.015em;
+      margin: 0;
+      text-transform: none;
+      transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .movie-header:hover .movie-title { opacity: 0.78; }
+
+    .movie-toggle {
+      font-family: var(--ff-body);
+      font-style: italic;
+      font-weight: 300;
+      font-size: var(--t-sm);
+      color: var(--ink-mute);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      align-self: end;
+      padding-bottom: 0.4em;
+    }
+    .movie-toggle::before { content: "Hide showtimes"; }
+    .movie-header[aria-expanded="false"] .movie-toggle::before {
+      content: "Show showtimes";
+    }
+
+    /* Smooth height animation via grid-template-rows */
+    .movie-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition:
+        grid-template-rows 360ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      opacity: 1;
+    }
+    .movie-header[aria-expanded="false"] + .movie-body {
+      grid-template-rows: 0fr;
+      opacity: 0;
+    }
+    .movie-body-inner { overflow: hidden; min-height: 0; }
+    .theater-list {
+      padding-top: var(--space-8);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---------- Theater rows ---------- */
+    .theater {
+      display: grid;
+      grid-template-columns: minmax(11rem, 14rem) 1fr;
+      column-gap: var(--space-8);
+      row-gap: var(--space-3);
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: var(--space-6);
+    }
+    .theater:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    @media (max-width: 720px) {
+      .theater {
+        grid-template-columns: 1fr;
+        row-gap: var(--space-2);
+      }
+    }
+
+    .theater-name {
+      font-family: var(--ff-body);
+      font-weight: 500;
+      font-size: var(--t-lg);
+      color: var(--ink);
+      line-height: 1.2;
+      margin: 0;
+      padding-top: 0.05em;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.22em;
+      text-decoration-color: var(--ink-soft);
+    }
+
+    .formats {
+      display: flex;
+      flex-direction: column;
+    }
+    .format {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .format:first-child { padding-top: 0; }
+    .format:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .format-info { min-width: 0; line-height: 1.35; }
+    .format-name {
+      font-family: var(--ff-body);
+      font-weight: 500;
+      font-size: var(--t-md);
+      color: var(--ink);
+    }
+    .format-tags {
+      font-family: var(--ff-body);
+      font-style: italic;
+      font-weight: 300;
+      font-size: var(--t-sm);
+      color: var(--ink-soft);
+      margin-left: 0.55em;
+    }
+    .format-tags::before { content: "— "; color: var(--ink-mute); }
+    .format-tags .tag-sep { color: var(--rule); margin: 0 0.35em; }
+
+    /* Showtimes: max 10 per line, wrap, LEFT-aligned */
+    .showtimes {
+      display: grid;
+      grid-template-columns: repeat(10, max-content);
+      column-gap: var(--space-4);
+      row-gap: var(--space-4);
+      justify-content: start;
+      align-items: start;
+      font-family: var(--ff-body);
+      font-weight: 400;
+      font-variant-numeric: tabular-nums lining-nums;
+      font-size: 1.125rem;
+      color: var(--ink);
+    }
+    @media (max-width: 1100px) {
+      .showtimes { grid-template-columns: repeat(8, max-content); }
+    }
+    @media (max-width: 900px) {
+      .showtimes { grid-template-columns: repeat(6, max-content); }
+    }
+    @media (max-width: 720px) {
+      .showtimes { grid-template-columns: repeat(4, max-content); }
+    }
+
+    .showtime {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      white-space: nowrap;
+      line-height: 1.1;
+    }
+    .showtime-time { font-size: 1em; line-height: 1.1; }
+    .showtime-end {
+      font-family: var(--ff-body);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 0.75rem;
+      color: var(--ink-mute);
+      letter-spacing: 0.005em;
+      margin-top: 0.35em;
+      height: 1em;
+      line-height: 1;
+      opacity: 0;
+      transition: opacity 600ms ease-in-out;
+      pointer-events: none;
+    }
+    .showtime:hover .showtime-end,
+    .showtime:focus-within .showtime-end { opacity: 1; }
+    .showtime.past .showtime-time {
+      color: var(--ink-mute);
+      font-style: italic;
+      font-weight: 300;
+    }
+    .showtime.next-up .showtime-time {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: var(--space-12) 0;
+      font-family: var(--ff-body);
+      font-style: italic;
+      font-size: var(--t-lg);
+      color: var(--ink-mute);
+      max-width: 48ch;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .movie-body,
+      .movie-title,
+      .sort-bar button,
+      .filter-toggle,
+      .filter-caret,
+      .filter-menu { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <h1>Now Showing&hellip;</h1>
+      <p class="masthead-tag" id="masthead-date-text"></p>
+    </header>
+
+    <div class="control-bar">
+      <div class="sort-bar" role="group" aria-label="Sort movies by frequency">
+        <span class="control-label">Sort</span>
+        <button type="button" data-sort="rare" aria-pressed="false">Rare</button>
+        <span class="slash" aria-hidden="true">/</span>
+        <button type="button" data-sort="widely" aria-pressed="true">Widely Shown</button>
+      </div>
+      <div class="filter-bar">
+        <span class="control-label">Theaters</span>
+        <button
+          type="button"
+          class="filter-toggle"
+          aria-expanded="false"
+          aria-controls="theater-menu"
+          aria-haspopup="true"
+        >
+          <span class="filter-summary">All theaters</span>
+          <span class="filter-caret" aria-hidden="true">▾</span>
+        </button>
+        <div
+          class="filter-menu"
+          id="theater-menu"
+          role="group"
+          aria-label="Filter by theater"
+          data-open="false"
+        >
+          <div class="filter-menu-inner">
+            <div class="filter-menu-card">
+              <div class="filter-meta">
+                <span class="filter-meta-label">Show movies playing at</span>
+                <button type="button" data-filter-action="all">All</button>
+              </div>
+              <div class="filter-options"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="movies" id="movie-list"></section>
+  </main>
+
+  <template id="tpl-movie">
+    <article class="movie">
+      <p class="movie-meta"></p>
+      <button class="movie-header" type="button" aria-expanded="true">
+        <h2 class="movie-title"></h2>
+        <span class="movie-toggle" aria-hidden="true"></span>
+      </button>
+      <div class="movie-body">
+        <div class="movie-body-inner">
+          <div class="theater-list"></div>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    // -------------------- Mock TMDB metadata --------------------
+    // Shape mirrors the planned TMDB enrichment endpoint:
+    //   { TITLE: { director, runtime, release_date } }
+    // Director is fetched but intentionally not displayed.
+    const movieMeta = {
+      "PAST LIVES":
+        { director: "Celine Song",       runtime: 105, release_date: "2023-06-02" },
+      "OPPENHEIMER":
+        { director: "Christopher Nolan", runtime: 180, release_date: "2023-07-21" },
+      "BARBIE: THE EXTENDED CUT":
+        { director: "Greta Gerwig",      runtime: 142, release_date: "2024-07-19" },
+      "THE WILD ROBOT":
+        { director: "Chris Sanders",     runtime: 102, release_date: "2024-09-27" },
+      "ANATOMY OF A FALL":
+        { director: "Justine Triet",     runtime: 152, release_date: "2023-08-23" },
+      "DUNE: PART THREE":
+        { director: "Denis Villeneuve",  runtime: 165, release_date: "2026-12-18" },
+    };
+
+    const movies = [
+      {
+        title: "PAST LIVES",
+        theaters: [
+          { name: "Alamo Mountain View",
+            formats: [{ name: "Alamo Standard", tags: [], times: ["1:30pm","4:15pm","7:45pm"] }] },
+          { name: "AMC Mercado",
+            formats: [{ name: "Standard", tags: ["Korean Spoken with English Subtitles"],
+              times: ["11:15am","2:00pm","5:00pm","8:15pm"] }] },
+          { name: "AMC Sunnyvale",
+            formats: [{ name: "Standard", tags: ["closed captioned"],
+              times: ["12:30pm","3:45pm","9:00pm"] }] },
+        ],
+      },
+      {
+        title: "OPPENHEIMER",
+        theaters: [
+          { name: "Alamo Mountain View",
+            formats: [{ name: "Alamo Standard", tags: [], times: ["1:00pm","4:30pm","8:00pm"] }] },
+          { name: "AMC Sunnyvale",
+            formats: [
+              { name: "IMAX", tags: [], times: ["12:00pm","3:30pm","7:00pm","10:30pm"] },
+              { name: "Dolby Cinema", tags: ["subtitled"], times: ["11:30am","2:45pm","6:15pm","9:30pm"] },
+            ] },
+        ],
+      },
+      {
+        title: "BARBIE: THE EXTENDED CUT",
+        theaters: [
+          { name: "Alamo Valley Fair",
+            formats: [{ name: "Alamo Standard", tags: [],
+              times: ["11:00am","1:15pm","3:30pm","5:45pm","8:00pm","10:15pm"] }] },
+          { name: "AMC Mercado",
+            formats: [
+              { name: "Standard", tags: ["closed captioned","reserved seating"],
+                times: ["10:30am","1:00pm","3:30pm","6:00pm","8:30pm","11:00pm","11:45pm"] },
+              { name: "Dolby Cinema", tags: ["subtitled"], times: ["12:30pm","4:00pm","7:30pm"] },
+            ] },
+        ],
+      },
+      {
+        title: "THE WILD ROBOT",
+        theaters: [
+          { name: "Alamo Mountain View",
+            formats: [{ name: "Alamo Standard", tags: [], times: ["10:00am","12:30pm","3:00pm"] }] },
+          { name: "Alamo Valley Fair",
+            formats: [{ name: "Alamo Standard", tags: ["subtitled"],
+              times: ["11:30am","2:00pm","4:30pm","7:00pm"] }] },
+          { name: "AMC Sunnyvale",
+            formats: [
+              { name: "IMAX", tags: ["subtitled","closed captioned"],
+                times: ["9:45am","12:15pm","2:45pm","5:15pm","7:45pm","10:15pm"] },
+              { name: "RealD 3D", tags: ["closed captioned"],
+                times: ["10:30am","1:15pm","4:00pm","6:45pm"] },
+              { name: "Standard", tags: [],
+                times: ["10:00am","12:30pm","3:00pm","5:30pm","8:00pm"] },
+            ] },
+          { name: "AMC Mercado",
+            formats: [{ name: "Standard", tags: ["18+","subtitled","closed captioned"],
+              times: ["9:00pm","11:30pm"] }] },
+        ],
+      },
+      // -------- Single-venue exclusives, to demo the theater filter --------
+      {
+        title: "ANATOMY OF A FALL",
+        theaters: [
+          { name: "Alamo Mountain View",
+            formats: [{ name: "Alamo Standard",
+              tags: ["French Spoken with English Subtitles"],
+              times: ["2:00pm","5:30pm","9:00pm"] }] },
+        ],
+      },
+      {
+        title: "DUNE: PART THREE",
+        theaters: [
+          { name: "AMC Sunnyvale",
+            formats: [{ name: "IMAX 70mm", tags: ["closed captioned","reserved seating"],
+              times: ["11:00am","3:00pm","7:00pm","11:00pm"] }] },
+        ],
+      },
+    ];
+
+    // -------------------- Helpers --------------------
+    function titleCaseDisplay(input) {
+      const s = String(input || "");
+      if (/[a-z]/.test(s)) return s;
+      return s.toLowerCase().replace(
+        /(^|[\s\-:'"\(])([a-z])/g,
+        (_, sep, ch) => sep + ch.toUpperCase()
+      );
+    }
+
+    function parseShowtime(str, baseDate) {
+      const m = String(str).trim().toLowerCase().match(/^(\d{1,2}):(\d{2})(am|pm)$/);
+      if (!m) return null;
+      let h = parseInt(m[1], 10);
+      const min = parseInt(m[2], 10);
+      if (m[3] === "pm" && h !== 12) h += 12;
+      if (m[3] === "am" && h === 12) h = 0;
+      const d = new Date(baseDate);
+      d.setHours(h, min, 0, 0);
+      return d;
+    }
+
+    function resolveNow() {
+      const params = new URLSearchParams(window.location.search);
+      const override = params.get("now");
+      if (override) {
+        const m = override.match(/^(\d{1,2}):(\d{2})$/);
+        if (m) {
+          const d = new Date();
+          d.setHours(parseInt(m[1], 10), parseInt(m[2], 10), 0, 0);
+          return d;
+        }
+      }
+      return new Date();
+    }
+
+    function fmtTime(t) { return t.replace(/(am|pm)$/i, "\u202F$1"); }
+
+    function fmtClock(date) {
+      let h = date.getHours();
+      const min = date.getMinutes();
+      const ampm = h >= 12 ? "pm" : "am";
+      h = h % 12;
+      if (h === 0) h = 12;
+      return `${h}:${String(min).padStart(2, "0")}\u202F${ampm}`;
+    }
+
+    function fullDateSentence(d) {
+      const opts = { weekday: "long", month: "long", day: "numeric", year: "numeric" };
+      return `The date is ${d.toLocaleDateString(undefined, opts)}.`;
+    }
+
+    function detectChain(theaterName) {
+      const n = String(theaterName || "").toLowerCase();
+      if (n.includes("alamo")) return "alamo";
+      if (n.includes("amc"))   return "amc";
+      return null;
+    }
+
+    // Midpoint of trailer/ad buffer:
+    //   AMC:   midpoint of [25, 30] -> 27.5 -> rounded to 28 minutes
+    //   Alamo: midpoint of [10, 13] -> 11.5 -> rounded to 12 minutes
+    function bufferMinutes(chain) {
+      if (chain === "alamo") return Math.round((10 + 13) / 2);  // 12
+      return Math.round((25 + 30) / 2);                          // 28
+    }
+
+    function computeEndApprox(startStr, baseDate, runtimeMin, chain) {
+      if (!runtimeMin) return null;
+      const start = parseShowtime(startStr, baseDate);
+      if (!start) return null;
+      const offsetMin = bufferMinutes(chain) + runtimeMin;
+      return new Date(start.getTime() + offsetMin * 60000);
+    }
+
+    function formatEndApprox(end) {
+      if (!end) return "";
+      return `ends ~${fmtClock(end)}`;
+    }
+
+    // -------------------- Counts & sort --------------------
+    function totalShowtimes(movie, theaterFilter) {
+      return movie.theaters
+        .filter((t) => !theaterFilter || theaterFilter.has(t.name))
+        .reduce((n, t) => n + t.formats.reduce((m, f) => m + f.times.length, 0), 0);
+    }
+    function chainShowtimes(movie, chain, theaterFilter) {
+      return movie.theaters
+        .filter((t) => (!theaterFilter || theaterFilter.has(t.name)) && detectChain(t.name) === chain)
+        .reduce((n, t) => n + t.formats.reduce((m, f) => m + f.times.length, 0), 0);
+    }
+
+    function sortMovies(list, mode, theaterFilter) {
+      const sorted = [...list];
+      sorted.sort((a, b) => {
+        const aTotal = totalShowtimes(a, theaterFilter);
+        const bTotal = totalShowtimes(b, theaterFilter);
+        const primary = mode === "rare" ? aTotal - bTotal : bTotal - aTotal;
+        if (primary !== 0) return primary;
+        const aDelta = chainShowtimes(a, "alamo", theaterFilter) - chainShowtimes(a, "amc", theaterFilter);
+        const bDelta = chainShowtimes(b, "alamo", theaterFilter) - chainShowtimes(b, "amc", theaterFilter);
+        return bDelta - aDelta;
+      });
+      return sorted;
+    }
+
+    // -------------------- Theater filter state --------------------
+    function collectAllTheaters(list) {
+      const set = new Set();
+      list.forEach((m) => m.theaters.forEach((t) => set.add(t.name)));
+      // Stable order: Alamo first (alpha), then AMC, then other
+      return [...set].sort((a, b) => {
+        const ca = detectChain(a) || "z";
+        const cb = detectChain(b) || "z";
+        if (ca !== cb) return ca.localeCompare(cb);
+        return a.localeCompare(b);
+      });
+    }
+
+    const ALL_THEATERS = collectAllTheaters(movies);
+    let selectedTheaters = new Set(ALL_THEATERS);
+    let currentSort = "widely";
+
+    function applyTheaterFilter(list) {
+      if (selectedTheaters.size === 0) return [];
+      return list
+        .filter((m) => m.theaters.some((t) => selectedTheaters.has(t.name)))
+        .map((m) => ({
+          ...m,
+          theaters: m.theaters.filter((t) => selectedTheaters.has(t.name)),
+        }));
+    }
+
+    // -------------------- Render --------------------
+    const NOW = resolveNow();
+    document.getElementById("masthead-date-text").textContent =
+      fullDateSentence(new Date());
+
+    const tpl = document.getElementById("tpl-movie");
+    const list = document.getElementById("movie-list");
+
+    function buildMovieNode(movie, sharedAccent) {
+      const node = tpl.content.firstElementChild.cloneNode(true);
+      node.querySelector(".movie-title").textContent =
+        titleCaseDisplay(movie.title);
+
+      const meta = movieMeta[movie.title] || {};
+      const total = movie.theaters.reduce(
+        (n, t) => n + t.formats.reduce((m, f) => m + f.times.length, 0),
+        0
+      );
+      const year = meta.release_date ? meta.release_date.slice(0, 4) : null;
+      const parts = [
+        year,
+        meta.runtime ? `${meta.runtime} min` : null,
+        `${total} showings`,
+      ].filter(Boolean);
+      node.querySelector(".movie-meta").innerHTML =
+        parts.join('<span class="sep">·</span>');
+
+      const theaterList = node.querySelector(".theater-list");
+      movie.theaters.forEach((theater) => {
+        const chain = detectChain(theater.name);
+        const tWrap = document.createElement("div");
+        tWrap.className = "theater";
+
+        const tName = document.createElement("h3");
+        tName.className = "theater-name";
+        tName.textContent = theater.name;
+        tWrap.appendChild(tName);
+
+        const fWrap = document.createElement("div");
+        fWrap.className = "formats";
+
+        theater.formats.forEach((fmt) => {
+          const row = document.createElement("div");
+          row.className = "format";
+
+          const info = document.createElement("div");
+          info.className = "format-info";
+          const name = document.createElement("span");
+          name.className = "format-name";
+          name.textContent = fmt.name;
+          info.appendChild(name);
+
+          if (fmt.tags && fmt.tags.length) {
+            const tags = document.createElement("span");
+            tags.className = "format-tags";
+            fmt.tags.forEach((t, i) => {
+              if (i > 0) {
+                const sep = document.createElement("span");
+                sep.className = "tag-sep";
+                sep.textContent = "·";
+                tags.appendChild(sep);
+              }
+              const tagText = document.createElement("span");
+              tagText.textContent = t;
+              tags.appendChild(tagText);
+            });
+            info.appendChild(tags);
+          }
+
+          row.appendChild(info);
+
+          const times = document.createElement("div");
+          times.className = "showtimes";
+          fmt.times.forEach((t) => {
+            const cell = document.createElement("span");
+            cell.className = "showtime";
+
+            const time = document.createElement("span");
+            time.className = "showtime-time";
+            time.textContent = fmtTime(t);
+            cell.appendChild(time);
+
+            const end = document.createElement("span");
+            end.className = "showtime-end";
+            const endDate = computeEndApprox(t, NOW, meta.runtime, chain);
+            end.textContent = formatEndApprox(endDate);
+            cell.appendChild(end);
+
+            const parsed = parseShowtime(t, NOW);
+            if (parsed) {
+              if (parsed.getTime() < NOW.getTime()) {
+                cell.classList.add("past");
+              } else if (
+                !sharedAccent.next ||
+                parsed.getTime() < sharedAccent.next.date.getTime()
+              ) {
+                sharedAccent.next = { cell, date: parsed };
+              }
+            }
+            times.appendChild(cell);
+          });
+          row.appendChild(times);
+
+          fWrap.appendChild(row);
+        });
+
+        tWrap.appendChild(fWrap);
+        theaterList.appendChild(tWrap);
+      });
+
+      return node;
+    }
+
+    function renderEmptyState() {
+      list.innerHTML = "";
+      const p = document.createElement("p");
+      p.className = "empty-state";
+      p.textContent =
+        selectedTheaters.size === 0
+          ? "No theaters selected. Choose at least one to see what is playing."
+          : "Nothing is playing at the selected theaters today.";
+      list.appendChild(p);
+    }
+
+    function render() {
+      const filtered = applyTheaterFilter(movies);
+      if (filtered.length === 0) {
+        renderEmptyState();
+      } else {
+        const sorted = sortMovies(filtered, currentSort, selectedTheaters);
+        list.innerHTML = "";
+        const sharedAccent = { next: null };
+        sorted.forEach((m) => list.appendChild(buildMovieNode(m, sharedAccent)));
+        if (sharedAccent.next) sharedAccent.next.cell.classList.add("next-up");
+      }
+
+      document.querySelectorAll(".sort-bar button").forEach((btn) => {
+        btn.setAttribute("aria-pressed", String(btn.dataset.sort === currentSort));
+      });
+      updateFilterSummary();
+    }
+
+    // -------------------- Filter dropdown UI --------------------
+    const filterToggle = document.querySelector(".filter-toggle");
+    const filterMenu   = document.getElementById("theater-menu");
+    const filterSummary = document.querySelector(".filter-summary");
+    const filterOptions = document.querySelector(".filter-options");
+
+    function updateFilterSummary() {
+      const total = ALL_THEATERS.length;
+      const sel = selectedTheaters.size;
+      if (sel === total)     filterSummary.textContent = "All theaters";
+      else if (sel === 0)    filterSummary.textContent = "No theaters";
+      else if (sel === 1) {
+        const only = [...selectedTheaters][0];
+        filterSummary.textContent = only;
+      } else                 filterSummary.textContent = `${sel} of ${total} theaters`;
+    }
+
+    function buildFilterOptions() {
+      filterOptions.innerHTML = "";
+      ALL_THEATERS.forEach((name) => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = name;
+        input.checked = selectedTheaters.has(name);
+        input.addEventListener("change", () => {
+          if (input.checked) selectedTheaters.add(name);
+          else selectedTheaters.delete(name);
+          render();
+        });
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(name));
+        filterOptions.appendChild(label);
+      });
+    }
+
+    function setMenuOpen(open) {
+      filterToggle.setAttribute("aria-expanded", String(open));
+      filterMenu.setAttribute("data-open", String(open));
+    }
+
+    filterToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = filterToggle.getAttribute("aria-expanded") === "true";
+      setMenuOpen(!isOpen);
+    });
+    filterMenu.addEventListener("click", (e) => e.stopPropagation());
+    document.addEventListener("click", () => setMenuOpen(false));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    });
+
+    document
+      .querySelector('[data-filter-action="all"]')
+      .addEventListener("click", () => {
+        const allOn = selectedTheaters.size === ALL_THEATERS.length;
+        if (allOn) {
+          selectedTheaters = new Set();
+        } else {
+          selectedTheaters = new Set(ALL_THEATERS);
+        }
+        buildFilterOptions();
+        render();
+      });
+
+    buildFilterOptions();
+    render();
+
+    // -------------------- Sort toggle + accordion --------------------
+    document.querySelector(".sort-bar").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-sort]");
+      if (!btn || btn.dataset.sort === currentSort) return;
+      currentSort = btn.dataset.sort;
+      render();
+    });
+
+    list.addEventListener("click", (e) => {
+      const btn = e.target.closest(".movie-header");
+      if (!btn) return;
+      const expanded = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!expanded));
+    });
+    list.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const btn = e.target.closest(".movie-header");
+      if (!btn) return;
+      e.preventDefault();
+      const expanded = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!expanded));
+    });
+  </script>
+</body>
+</html>

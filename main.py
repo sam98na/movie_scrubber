@@ -65,6 +65,14 @@ def overall_scraper():
             print(f"-- {movie} (Alamo Valley Fair)")
     print("\n\n")
 
+    molded_mt_data = mold_to_amc_format(current_day_mt_data)
+    molded_vf_data = mold_to_amc_format(current_day_vf_data)
+    toReturn = {"Alamo Mountain View": molded_mt_data, 
+                "Alamo Valley Fair": molded_vf_data,
+                "AMC Sunnyvale": sunnyvale_amc_data,
+                "AMC Mercado": mercado_amc_data}
+    return toReturn
+
 def loaded_scraper():
     with open("saved_jsons/alamo_mt_data.json", "r") as f:
         mt_data = yaml.safe_load(f)
@@ -85,4 +93,4 @@ def loaded_scraper():
     pprint.pprint(sunnyvale_data)
 
 if __name__ == "__main__":
-    loaded_scraper()
+    overall_scraper()

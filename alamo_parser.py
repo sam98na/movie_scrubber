@@ -63,16 +63,18 @@ def get_unique_names(current_data):
 
 def mold_to_amc_format(current_data):
     molded_data = {}
-    for movie_name, showtimes in current_data.items():
-        molded_data[movie_name.upper().strip()] = {
-            "formats": [
-                {
-                    "format_name": "Alamo Standard",
-                    "attributes": [],
-                    "showtimes": showtimes
-                }
-            ]
-        }
+    for date, movie_items in current_data.items():
+        molded_data[date] = {}
+        for movie_name, showtimes in movie_items.items():
+            molded_data[date][movie_name.upper().strip()] = {
+                "formats": [
+                    {
+                        "format_name": "Alamo Standard",
+                        "attributes": [],
+                        "showtimes": showtimes
+                    }
+                ]
+            }
     return molded_data
 
 if __name__ == "__main__":
