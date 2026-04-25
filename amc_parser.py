@@ -1,6 +1,8 @@
+import os
 import re
+import sys
 
-from utils import get_text_from_element, initialize_webdriver, clean_amc_format
+from utils import get_text_from_element, initialize_webdriver, clean_amc_format, get_current_datetime_pst
 
 from selenium import webdriver
 from selenium_stealth import stealth
@@ -9,13 +11,13 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from collections import defaultdict
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 import yaml
 import pprint
 
 config = yaml.safe_load(open("config.yaml", "r"))
 
-def main_amc_scraper(amc_link, date=datetime.now().strftime("%Y-%m-%d")):
+def main_amc_scraper(amc_link, date=get_current_datetime_pst().strftime("%Y-%m-%d")):
     print("-- Starting AMC Scraper --")
     driver = initialize_webdriver()
 
@@ -63,8 +65,26 @@ def main_amc_scraper(amc_link, date=datetime.now().strftime("%Y-%m-%d")):
     driver.quit()
     return overall_data
 
+def get_seven_days_of_amc_data(amc_link, start_date=None):
+    """Scrape 7 consecutive days of AMC data starting at `start_date`
+    (defaults to today), returning `{YYYY-MM-DD: day_data}`."""
+    if start_date is None:
+        start_dt = get_current_datetime_pst()
+    else:
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+    overall_data = {}
+    for i in range(7):
+        day_key = (start_dt + timedelta(days=i)).strftime("%Y-%m-%d")
+        print(f"Current day: {day_key}")
+        overall_data[day_key] = main_amc_scraper(amc_link, day_key)
+    return overall_data
+
 def get_unique_names(overall_data):
-    return set(overall_data.keys())
+    to_return = set()
+    for date, movie_items in overall_data.items():
+        for movie_name in movie_items.keys():
+            to_return.add(movie_name)
+    return to_return
 
 if __name__ == "__main__":
     amc_data = main_amc_scraper(config["amc_sunval_link"])

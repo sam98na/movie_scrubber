@@ -4,6 +4,7 @@ import re
 from selenium import webdriver
 from selenium_stealth import stealth
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 def get_text_from_element(element):
     text = element.text
@@ -65,5 +66,11 @@ def export_as_json(data, filename):
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
 
+def get_current_datetime_pst():
+    return datetime.now(tz=ZoneInfo("America/Los_Angeles"))
+
+def year_from_string(date_string):
+    return int(date_string[:4])
+
 if __name__ == "__main__":
-    print(convert_date_to_uniform("Mon, Mar 9"))
+    print(get_current_datetime_pst())

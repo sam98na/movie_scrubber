@@ -2,7 +2,10 @@ alamo_sf_link: https://www.drafthouse.com/sf?showCalendar=true
 alamo_la_link: https://www.drafthouse.com/los-angeles?showCalendar=true
 
 amc_sunval_link: https://www.amctheatres.com/movie-theatres/san-francisco/amc-dine-in-sunnyvale-12/showtimes?date=
-amc_mercado_link: https://www.amctheatres.com/movie-theatres/san-francisco/amc-mercado-20/showtimes?date=
-amc_metreon_link: 
-amc_kabuki_link:
-amc_baystreet_link:
+amc_mercado_link: https://www.amctheatres.com/movie-theatres/san-jose/amc-mercado-20/showtimes?date=
+amc_metreon_link: https://www.amctheatres.com/movie-theatres/san-francisco/amc-metreon-16/showtimes?date=
+amc_kabuki_link: https://www.amctheatres.com/movie-theatres/san-francisco/amc-kabuki-8/showtimes?date=
+amc_baystreet_link: https://www.amctheatres.com/movie-theatres/san-francisco/amc-bay-street-16/showtimes?date=
+
+tmdb_movie_search_link: https://api.themoviedb.org/3/search/movie?query={movie_name}&include_adult=false&language=en-US&page=1
+tmdb_movie_metadata_link: https://api.themoviedb.org/3/movie/movie_id/{movie_id}?language=en-US'
