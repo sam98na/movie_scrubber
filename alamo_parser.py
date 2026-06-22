@@ -80,9 +80,6 @@ def get_current_day_data(overall_data):
     current_day = get_current_datetime_pst().strftime("%Y-%m-%d")
     return overall_data.get(current_day, {})
 
-def get_unique_names(current_data):
-    return set(current_data.keys())
-
 def mold_to_amc_format(current_data):
     molded_data = {}
     for date, movie_items in current_data.items():
@@ -118,7 +115,7 @@ def get_unique_names(current_data):
     for date, movie_items in current_data.items():
         for movie_name in movie_items.keys():
             to_return.add(movie_name)
-    return to_return
+    return list(to_return)
 
 if __name__ == "__main__":
     alamo_data = main_alamo_scraper(config["alamo_sf_link"], "Mountain View")

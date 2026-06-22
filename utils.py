@@ -1,5 +1,6 @@
 import json
 import re
+from rapidfuzz import fuzz, process
 
 from selenium import webdriver
 from selenium_stealth import stealth
@@ -71,6 +72,14 @@ def get_current_datetime_pst():
 
 def year_from_string(date_string):
     return int(date_string[:4])
+
+def movie_similarity_check(movie_name_1, movie_name_2):
+    # REMOVES ANYTHING AFTER "(" USUALLY USED IN "(DATE)" IN MOVIE NAMES
+    match1 = re.search(r".*(?=\()" , movie_name_1)
+    match2 = re.search(r".*(?=\()" , movie_name_2)
+    match1 = match1.group().strip() if match1 else movie_name_1
+    match2 = match2.group().strip() if match2 else movie_name_2
+    return True if fuzz.token_set_ratio(match1.lower(), match2.lower()) > 80 else False
 
 if __name__ == "__main__":
     print(get_current_datetime_pst())

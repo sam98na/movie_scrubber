@@ -8,4 +8,4 @@ amc_kabuki_link: https://www.amctheatres.com/movie-theatres/san-francisco/amc-ka
 amc_baystreet_link: https://www.amctheatres.com/movie-theatres/san-francisco/amc-bay-street-16/showtimes?date=
 
 tmdb_movie_search_link: https://api.themoviedb.org/3/search/movie?query={movie_name}&include_adult=false&language=en-US&page=1
-tmdb_movie_metadata_link: https://api.themoviedb.org/3/movie/movie_id/{movie_id}?language=en-US'
+tmdb_movie_metadata_link: https://api.themoviedb.org/3/movie/{movieID}?language=en-US

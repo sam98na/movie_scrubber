@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import time
 
 from utils import get_text_from_element, initialize_webdriver, clean_amc_format, get_current_datetime_pst
 
@@ -76,7 +77,15 @@ def get_seven_days_of_amc_data(amc_link, start_date=None):
     for i in range(7):
         day_key = (start_dt + timedelta(days=i)).strftime("%Y-%m-%d")
         print(f"Current day: {day_key}")
-        overall_data[day_key] = main_amc_scraper(amc_link, day_key)
+        try:
+            curr_day_data = main_amc_scraper(amc_link, day_key)
+            overall_data[day_key] = curr_day_data
+        except Exception as e:
+            print(f"Exception occured: {e}")
+            print("Retrying...")
+            time.sleep(10)
+            curr_day_data = main_amc_scraper(amc_link, day_key)
+            overall_data[day_key] = curr_day_data
     return overall_data
 
 def get_unique_names(overall_data):
@@ -84,7 +93,7 @@ def get_unique_names(overall_data):
     for date, movie_items in overall_data.items():
         for movie_name in movie_items.keys():
             to_return.add(movie_name)
-    return to_return
+    return list(to_return)
 
 if __name__ == "__main__":
     amc_data = main_amc_scraper(config["amc_sunval_link"])
